@@ -12,9 +12,9 @@ class Simulation {
 	targetted = new Set();
 
 	constructor(options = {}) {
-		this.initPrey = options['initPrey'] || 100;
-		this.initPred = options['initPred'] || 10;
-		this.mutationRate = options['mutationRate'] || 0.04;
+		this.initPrey = options['initPrey'] || 10;
+		this.initPred = options['initPred'] || 1;
+		this.mutationRate = options['mutationRate'] || 4;
 		this.preyOptions = options['preyOptions'] || {};
 		this.predatorOptions = options['predatorOptions'] || {};
 
@@ -37,6 +37,7 @@ class Simulation {
 	}
 
 	animate() {
+		if (this.preys.size === 0 || this.predators.size === 0) return this.finish();
 		requestAnimationFrame(() => this.animate());
 		this.ctx.clearRect(0, 0, document.documentElement.clientWidth, document.documentElement.clientHeight);
 		this.update();
@@ -68,6 +69,13 @@ class Simulation {
 				this.predators.add(blob);
 				break;
 		}
+	}
+
+	finish() {
+		this.ctx.font = `${canvas.width / 11}px Arial`;
+		this.ctx.fillStyle = this.preys.size === 0 ? "RED" : "GREEN"; // "WHITE"
+		this.ctx.textAlign = "center";
+		this.ctx.fillText(`Predators: ${this.predators.size}\nPreys: ${this.preys.size}`, canvas.width / 2, canvas.height / 2);
 	}
 }
 

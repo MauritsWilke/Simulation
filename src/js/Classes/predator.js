@@ -14,7 +14,12 @@ class Predator extends Base {
 		this.genomes = new Genomes();
 		this.genomes.add(new Genome("size", 5, 0.5));
 		this.genomes.add(new Genome("view", 240, 5));
-		this.genomes.add(new Genome("maxSpeed", 4, 0.3))
+		this.genomes.add(new Genome("maxSpeed", 4, 0.3));
+		this.genomes.add(new Genome("maxAge", 200, 1));
+		this.genomes.add(new Genome("maxAge", 5000, 1));
+		this.genomes.add(new Genome("maxNotEaten", 700, 1));
+
+		this.notEaten = 0;
 	}
 
 	wander() {
@@ -22,12 +27,17 @@ class Predator extends Base {
 	}
 
 	update(ctx, simulation) {
+		if (this.steps > this.genomes.getValue("maxAge") && this.notEaten > this.genomes.getValue("maxNotEaten")) return simulation.kill("predator", this)
+		this.notEaten++;
+
 		const nearest = this.getNearestPrey(simulation);
 		if (nearest.pos) {
-			if (circleCollision(this, nearest)) simulation.kill("prey", nearest)
-			this.vel.angle = this.aimAtPos(nearest.pos);
-		}
-		else this.wander();
+			if (circleCollision(this, nearest)) {
+				this.notEaten = 0;
+				simulation.kill("prey", nearest)
+			} this.vel.angle = this.aimAtPos(nearest.pos);
+		} else this.wander();
+
 		this.pos = modCoords(this.vel.apply(this.pos), canvas);
 		super.update(ctx)
 	}

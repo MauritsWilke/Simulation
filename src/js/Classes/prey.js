@@ -14,22 +14,30 @@ class Prey extends Base {
 		this.genomes.add(new Genome("view", 120, 5));
 		this.genomes.add(new Genome("maxSpeed", 1.5, 0.3));
 		this.genomes.add(new Genome("maxRuntime", 100, 1));
-		this.genomes.add(new Genome("maxAge", 200, 1))
+		this.genomes.add(new Genome("maxAge", 2000, 1));
+		this.genomes.add(new Genome("maxEnergy", 100, 1));
 
 		this.runtime = 0;
+		this.energy = this.genomes.getValue('maxEnergy');
 	}
 
 	wander() {
+		this.energy -= 1;
 		this.vel.angle += random(-0.035, 0.035);
 		if (this.vel.magnitude > 1.5) this.vel.magnitude -= 0.05;
 	}
 
 	run() {
+		this.energy -= 3;
 		this.runtime--;
 		this.vel.magnitude = this.genomes.getValue("maxSpeed");
 	}
 
 	update(ctx, simulation) {
+		if (this.steps > this.genomes.getValue("maxAge") || this.energy <= 0) return simulation.kill("prey", this)
+		if (this.energy > this.genomes.getValue("ma")) {
+
+		}
 		const nearest = this.getNearestPred(simulation);
 		if (nearest) this.runtime = this.genomes.getValue("maxRuntime")
 		if (nearest || this.runtime > 0) {
