@@ -1,5 +1,6 @@
-import Prey from "./prey.js"
-import Predator from "./predator.js"
+import Prey from "./prey.js";
+import Predator from "./predator.js";
+import Plant from "./plant.js";
 import { createSimulation } from "../dom.js"
 
 let simCount = 0;
@@ -9,11 +10,13 @@ class Simulation {
 
 	preys = new Set();
 	predators = new Set();
+	plants = new Set();
 	targetted = new Set();
 
 	constructor(options = {}) {
 		this.initPrey = options['initPrey'] || 10;
 		this.initPred = options['initPred'] || 1;
+		this.initPlants = options['initPlants'] || 20;
 		this.mutationRate = options['mutationRate'] || 4;
 		this.preyOptions = options['preyOptions'] || {};
 		this.predatorOptions = options['predatorOptions'] || {};
@@ -29,10 +32,13 @@ class Simulation {
 		this.init();
 	}
 
+	all = () => new Set([...this.preys, ...this.predators, ...this.plants]);
+
 	init() {
 		createSimulation(this);
 		for (let i = 0; i < this.initPrey; i++) this.preys.add(new Prey(this.preyOptions));
 		for (let i = 0; i < this.initPred; i++) this.predators.add(new Predator(this.predatorOptions));
+		for (let i = 0; i < this.initPlants; i++) this.plants.add(new Plant({}));
 		this.animate();
 	}
 
@@ -45,8 +51,7 @@ class Simulation {
 
 	update() {
 		this.targetted = new Set();
-		this.preys.forEach(prey => prey.update(this.ctx, this));
-		this.predators.forEach(pred => pred.update(this.ctx, this));
+		this.all().forEach(v => v.update(this.ctx, this));
 	}
 
 	kill(type, blob) {
@@ -57,16 +62,23 @@ class Simulation {
 			case "predator":
 				this.predators.delete(blob);
 				break;
+			case "plant":
+				this.plants.delete(blob);
+				break;
 		}
 	}
 
 	spawn(type, blob) {
+		const copy = JSON.parse(JSON.stringify(blob))
 		switch (type) {
 			case "prey":
-				this.preys.add(blob);
+				this.preys.add(new Prey(copy));
 				break;
 			case "predator":
-				this.predators.add(blob);
+				this.predators.add(new Predator(copy));
+				break;
+			case "plant":
+				this.plants.add(new Plant(copy));
 				break;
 		}
 	}
