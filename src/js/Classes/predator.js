@@ -10,11 +10,11 @@ class Predator extends Base {
 		this.pos = [random(0, canvas.width), random(0, canvas.height)];
 		this.vel = new Vector(Math.PI / 2, 2);
 
-		this.colour = "#F55";
+		this.colour = "#eb4034";
 		this.genomes = new Genomes();
 		this.genomes.add(new Genome("size", 5, 0.5));
 		this.genomes.add(new Genome("view", 240, 5));
-		this.genomes.add(new Genome("maxSpeed", 4, 0.3));
+		this.genomes.add(new Genome("maxSpeed", 1.5, 0.3));
 		this.genomes.add(new Genome("maxAge", 200, 1));
 		this.genomes.add(new Genome("maxAge", 5000, 1));
 		this.genomes.add(new Genome("maxNotEaten", 700, 1));

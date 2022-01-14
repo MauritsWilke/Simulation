@@ -12,23 +12,20 @@ class Prey extends Base {
 		this.genomes = new Genomes();
 		this.genomes.add(new Genome("size", 5, 0.5));
 		this.genomes.add(new Genome("view", 120, 5));
-		this.genomes.add(new Genome("maxSpeed", 4, 0.3));
+		this.genomes.add(new Genome("maxSpeed", 3, 0.3));
 		this.genomes.add(new Genome("maxRuntime", 100, 1));
-		this.genomes.add(new Genome("maxAge", 2000, 1));
-		this.genomes.add(new Genome("maxEnergy", 500, 1));
+		this.genomes.add(new Genome("maxAge", Infinity, 1));
 
 		this.runtime = 0;
-		this.energy = this.genomes.getValue('maxEnergy');
+		this.repChance = 0;
 	}
 
 	wander() {
-		this.energy -= 1;
 		this.vel.angle += random(-0.035, 0.035);
 		if (this.vel.magnitude > 1.5) this.vel.magnitude -= 0.05;
 	}
 
 	run() {
-		this.energy -= 3;
 		this.runtime--;
 		this.vel.magnitude = this.genomes.getValue("maxSpeed");
 	}
@@ -36,28 +33,23 @@ class Prey extends Base {
 	update(ctx, simulation) {
 		if (this.steps > this.genomes.getValue("maxAge")) return simulation.kill("prey", this)
 
-		if (this.energy > this.genomes.getValue("maxEnergy") * 0.5) {
-			if (Math.random() < 0.0001) {
-				this.energy -= 20;
-				simulation.spawn("prey", this);
-			}
-		}
+		// this.repChance += 0.0005;
+		// if (Math.random() * 100 < this.repChance) {
+		// 	simulation.spawn('prey', this);
+		// 	this.repChance = 0;
+		// }
 
 		const nearest = this.getNearestPred(simulation);
 		if (nearest) this.runtime = this.genomes.getValue("maxRuntime")
-		if ((nearest || (this.runtime > 0 && nearest)) && this.energy > 0) {
-			this.vel.angle = this.aimAtPos(nearest.pos) + Math.PI;
+		if (nearest || this.runtime > 0) {
+			this.vel.angle = this.aimAtPos(nearest?.pos) + Math.PI;
 			this.run();
 		} else this.wander();
 
 		const nearestPlant = this.getNearestPlant(simulation);
 		if (nearestPlant) {
 			this.vel.angle = this.aimAtPos(nearestPlant.pos);
-			if (circleCollision(this, nearestPlant)) {
-				this.energy += nearestPlant.genomes.getValue("energy");
-				if (this.energy > this.genomes.getValue("maxEnergy")) this.energy = this.genomes.getValue("maxEnergy");
-				simulation.kill("plant", nearestPlant)
-			}
+			if (circleCollision(this, nearestPlant)) simulation.kill("plant", nearestPlant);
 		}
 
 		this.pos = modCoords(this.vel.apply(this.pos), canvas);
@@ -89,7 +81,7 @@ class Prey extends Base {
 	}
 
 	aimAtPos(pos) {
-		if (!pos) return this.angle;
+		if (!pos) return this.vel.angle - Math.PI;
 		const dy = mod(pos[1] - this.pos[1] + canvas.height / 2, canvas.height) - canvas.height / 2;
 		const dx = mod(pos[0] - this.pos[0] + canvas.width / 2, canvas.width) - canvas.width / 2;
 		return Math.atan2(dy, dx)

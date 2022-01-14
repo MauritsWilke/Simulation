@@ -23,6 +23,16 @@ function createSimulation(simulation) {
 		window.open(canvas.toDataURL('image/png'), "_blank").focus()
 	})
 
+	canvas.addEventListener('click', async (e) => {
+		const [x, y] = [e.clientX, e.clientY];
+		for (let blob of simulation.all()) {
+			const dx = Math.abs(x - blob.pos[0]);
+			const dy = Math.abs(y - blob.pos[1])
+			const distance = Math.sqrt(dx * dx + dy * dy)
+			if (distance < 50) return statsCard(blob);
+		}
+	})
+
 	if (simulation.canvas.resize) {
 		window.addEventListener('resize', () => {
 			canvas.width = innerWidth;
@@ -35,9 +45,89 @@ function createSimulation(simulation) {
 }
 
 function statsCard(blob) {
+	const [x, y] = [blob.pos[0] + 10, blob.pos[1] + 10];
 
+	const infoCard = document.createElement('div');
+	infoCard.style = `	position: absolute; 
+						top: ${y}px; 
+						left: ${x}px; 
+						background-color: ${blob.colour};
+						overflow-wrap: break-word;
+						border-radius: 5px;
+						margin: 5px;`;
+
+	const title = document.createElement('h3');
+	title.style = "text-align: center";
+	title.innerText = blob.name ?? "Dennis";
+
+	//#region Divider
+	const divider = document.createElement('hr');
+	divider.style = `	width: 80%;
+						margin-left: 10%;
+						border: 1px solid black;
+						margin-top: 5px;`;
+	//#endregion Divider
+	//#region Stats
+	const stats = document.createElement('ul');
+	const content = [
+		`🔷 Size: ${blob.size}`,
+		`&nbsp;📍 Position: ${Math.round(blob.pos[0])} ,${Math.round(blob.pos[1])}`,
+		`🦶 Steps: ${blob.steps}`,
+		`🧬 Genomes:`,
+	];
+	for (const gen in blob.genomes.genomes) content.push(`&emsp;&ensp; • ${gen}: ${blob.genomes.getValue(gen).toFixed(2)}`)
+
+	content.forEach(v => {
+		const li = document.createElement('li');
+		li.innerHTML = v;
+		stats.appendChild(li);
+	})
+
+	stats.style = "margin: 10px; text-align: top; list-style-type: none;"
+	//#endregion Stats
+	//#region Bottom
+	let s = 5;
+	const bottom = document.createElement('p');
+	bottom.innerText = `Auto closes in ${s--}`
+	bottom.style = `text-align: center; margin-bottom: 5px; margin-top: 5px;`;
+	//#endregion Bottom
+
+	infoCard.appendChild(title);
+	infoCard.appendChild(divider);
+	infoCard.appendChild(stats);
+	infoCard.appendChild(bottom);
+	// const sizes = getSize(infoCard);
+	// if (x + sizes.width > canvas.width - sizes.width + 50) infoCard.style.left = `${x - sizes.width}px`;
+	// if (y + sizes.height > canvas.height - sizes.height + 50) infoCard.style.top = `${y - sizes.width - 170}px`;
+	document.body.appendChild(infoCard);
+
+	setInterval(() => infoCard.children[3].innerText = infoCard.children[3].innerText.replace(/\d/g, s--), 1000);
+	setTimeout(() => { infoCard.remove() }, 5000);
+	infoCard.addEventListener('click', () => infoCard.remove());
+	console.log(JSON.stringify(blob, 0, 2));
 }
 
+function getSize(el) {
+	const vis = el.style.visibility || "visible";
+	const pos = el.style.position || "static";
+
+	el.style.visibility = 'hidden';
+	el.style.position = 'absolute';
+
+	document.body.appendChild(el);
+	let result = {
+		height: el.clientHeight,
+		width: el.clientWidth,
+	}
+	el.parentNode.removeChild(el);
+
+	el.style.visibility = vis;
+	el.style.position = pos;
+	return result;
+}
+
+
 export {
-	createSimulation
+	createSimulation,
+	statsCard
 }
