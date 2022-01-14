@@ -33,11 +33,11 @@ class Prey extends Base {
 	update(ctx, simulation) {
 		if (this.steps > this.genomes.getValue("maxAge")) return simulation.kill("prey", this)
 
-		// this.repChance += 0.0005;
-		// if (Math.random() * 100 < this.repChance) {
-		// 	simulation.spawn('prey', this);
-		// 	this.repChance = 0;
-		// }
+		this.repChance += 0.00005;
+		if (Math.random() * 100 < this.repChance) {
+			simulation.spawn('prey', this);
+			this.repChance = 0;
+		}
 
 		const nearest = this.getNearestPred(simulation);
 		if (nearest) this.runtime = this.genomes.getValue("maxRuntime")
@@ -46,11 +46,14 @@ class Prey extends Base {
 			this.run();
 		} else this.wander();
 
-		const nearestPlant = this.getNearestPlant(simulation);
-		if (nearestPlant) {
-			this.vel.angle = this.aimAtPos(nearestPlant.pos);
-			if (circleCollision(this, nearestPlant)) simulation.kill("plant", nearestPlant);
+		if (!nearest && this.runtime === 0) {
+			const nearestPlant = this.getNearestPlant(simulation);
+			if (nearestPlant) {
+				this.vel.angle = this.aimAtPos(nearestPlant.pos);
+				if (circleCollision(this, nearestPlant)) simulation.kill("plant", nearestPlant);
+			}
 		}
+
 
 		this.pos = modCoords(this.vel.apply(this.pos), canvas);
 		super.update(ctx);

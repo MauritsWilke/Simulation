@@ -1,7 +1,7 @@
 import Prey from "./prey.js";
 import Predator from "./predator.js";
 import Plant from "./plant.js";
-import { createSimulation, statsCard } from "../dom.js"
+import { createSimulation } from "../dom.js"
 
 let simCount = 0;
 class Simulation {
@@ -14,8 +14,8 @@ class Simulation {
 	targetted = new Set();
 
 	constructor(options = {}) {
-		this.initPrey = options['initPrey'] || 100;
-		this.initPred = options['initPred'] || 7;
+		this.initPrey = options['initPrey'] || 10;
+		this.initPred = options['initPred'] || 1;
 		this.initPlants = options['initPlants'] || 20;
 		this.mutationRate = options['mutationRate'] || 4;
 		this.preyOptions = options['preyOptions'] || {};
@@ -36,9 +36,9 @@ class Simulation {
 
 	init() {
 		createSimulation(this);
+		for (let i = 0; i < this.initPlants; i++) this.plants.add(new Plant({}));
 		for (let i = 0; i < this.initPrey; i++) this.preys.add(new Prey(this.preyOptions));
 		for (let i = 0; i < this.initPred; i++) this.predators.add(new Predator(this.predatorOptions));
-		for (let i = 0; i < this.initPlants; i++) this.plants.add(new Plant({}));
 		this.animate();
 	}
 

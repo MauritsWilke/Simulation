@@ -45,7 +45,7 @@ function createSimulation(simulation) {
 }
 
 function statsCard(blob) {
-	const [x, y] = [blob.pos[0] + 10, blob.pos[1] + 10];
+	const [x, y] = [blob.pos[0], blob.pos[1]];
 
 	const infoCard = document.createElement('div');
 	infoCard.style = `	position: absolute; 
@@ -96,12 +96,17 @@ function statsCard(blob) {
 	infoCard.appendChild(divider);
 	infoCard.appendChild(stats);
 	infoCard.appendChild(bottom);
-	// const sizes = getSize(infoCard);
-	// if (x + sizes.width > canvas.width - sizes.width + 50) infoCard.style.left = `${x - sizes.width}px`;
-	// if (y + sizes.height > canvas.height - sizes.height + 50) infoCard.style.top = `${y - sizes.width - 170}px`;
+
+	const sizes = getSize(infoCard);
+	if (x + sizes.width > canvas.width - sizes.width) infoCard.style.left = `${x - sizes.width - 20}px`
+	if (y + sizes.height > canvas.height - sizes.height) infoCard.style.top = `${y - sizes.height - 20}px`
+
 	document.body.appendChild(infoCard);
 
-	setInterval(() => infoCard.children[3].innerText = infoCard.children[3].innerText.replace(/\d/g, s--), 1000);
+	const delInterval = setInterval(() => {
+		if (s === 0) clearInterval(delInterval);
+		infoCard.children[3].innerText = infoCard.children[3].innerText.replace(/\d/g, s--)
+	}, 1000);
 	setTimeout(() => { infoCard.remove() }, 5000);
 	infoCard.addEventListener('click', () => infoCard.remove());
 	console.log(JSON.stringify(blob, 0, 2));
@@ -110,9 +115,13 @@ function statsCard(blob) {
 function getSize(el) {
 	const vis = el.style.visibility || "visible";
 	const pos = el.style.position || "static";
+	const top = el.style.top || "0px";
+	const left = el.style.left || "0px";
 
 	el.style.visibility = 'hidden';
 	el.style.position = 'absolute';
+	el.style.top = "0px";
+	el.style.left = "0px";
 
 	document.body.appendChild(el);
 	let result = {
@@ -123,9 +132,10 @@ function getSize(el) {
 
 	el.style.visibility = vis;
 	el.style.position = pos;
+	el.style.top = top;
+	el.style.left = left;
 	return result;
 }
-
 
 export {
 	createSimulation,
